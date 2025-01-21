@@ -1,8 +1,11 @@
 import { Router } from "express";
 import { requestSchema } from "../lib/types/zod";
 import axios from "axios";
+import { dummyRoutes } from "./routes/dummy";
 
 export const router = Router();
+
+router.use("/dummy", dummyRoutes);
 
 router.post("/request", async (req, res) => {
 	try {
@@ -54,19 +57,31 @@ router.post("/request", async (req, res) => {
 		console.log("headers ", modifiedHeaders);
 		console.log("contentType ", modifiedContentType);
 		console.log("body ", body);
+		console.log("requestType ", requestType);
 
 		let urlResponse;
-		try {
-			urlResponse = await axios({
-				url: modifiedUrl,
-				method: requestType,
+
+		let options: any = {
+			url: modifiedUrl,
+			method: requestType,
+			headers: {
+				"Content-Type": modifiedContentType,
+				...modifiedHeaders,
+			},
+		};
+
+		if (requestType !== "GET") {
+			options = {
+				...options,
 				data: body,
-				headers: {
-					"Content-Type": modifiedContentType,
-					...modifiedHeaders,
-				},
-			});
+			};
+		}
+
+		try {
+			urlResponse = await axios(options);
 		} catch (err) {
+			// console.log(err);
+
 			res.status(500).json({ msg: JSON.stringify(err) });
 			return;
 		}

@@ -45,7 +45,7 @@ export function HomeComp() {
 	});
 
 	const [url, setUrl] = useState("");
-	const [requestType, setRequestType] = useState("");
+	const [requestType, setRequestType] = useState("get");
 	const [bodyData, setBodyData] = useState("");
 	const [params, setParams] = useState<{ key: string; value: string }[]>([]);
 	const [headers, setHeaders] = useState<{ key: string; value: string }[]>([]);
@@ -77,11 +77,15 @@ export function HomeComp() {
 		try {
 			e.preventDefault();
 
+			console.log(requestType);
+
 			sendRequestMutation.mutate();
 		} catch (err) {
 			console.log(err);
 		}
 	};
+
+	// console.log(requestType);
 
 	return (
 		<Card className="w-full">
@@ -94,8 +98,11 @@ export function HomeComp() {
 					<div className="grid grid-cols-5 w-full items-center gap-4">
 						<div className="col-span-1 flex flex-col space-y-1.5">
 							<Select
-								defaultValue="get"
-								onValueChange={(e) => setRequestType(e.toUpperCase())}
+								onValueChange={(value) => {
+									console.log(value);
+
+									setRequestType(() => value.toUpperCase());
+								}}
 							>
 								<SelectTrigger id="request">
 									<SelectValue placeholder="GET" />

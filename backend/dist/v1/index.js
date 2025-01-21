@@ -16,7 +16,9 @@ exports.router = void 0;
 const express_1 = require("express");
 const zod_1 = require("../lib/types/zod");
 const axios_1 = __importDefault(require("axios"));
+const dummy_1 = require("./routes/dummy");
 exports.router = (0, express_1.Router)();
+exports.router.use("/dummy", dummy_1.dummyRoutes);
 exports.router.post("/request", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const validateInput = zod_1.requestSchema.safeParse(req.body);
@@ -57,16 +59,21 @@ exports.router.post("/request", (req, res) => __awaiter(void 0, void 0, void 0, 
         console.log("headers ", modifiedHeaders);
         console.log("contentType ", modifiedContentType);
         console.log("body ", body);
+        console.log("requestType ", requestType);
         let urlResponse;
+        let options = {
+            url: modifiedUrl,
+            method: requestType,
+            headers: Object.assign({ "Content-Type": modifiedContentType }, modifiedHeaders),
+        };
+        if (requestType !== "GET") {
+            options = Object.assign(Object.assign({}, options), { data: body });
+        }
         try {
-            urlResponse = yield (0, axios_1.default)({
-                url: modifiedUrl,
-                method: requestType,
-                data: body,
-                headers: Object.assign({ "Content-Type": modifiedContentType }, modifiedHeaders),
-            });
+            urlResponse = yield (0, axios_1.default)(options);
         }
         catch (err) {
+            // console.log(err);
             res.status(500).json({ msg: JSON.stringify(err) });
             return;
         }
